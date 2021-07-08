@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/games/kadoatery/
@@ -32,7 +32,7 @@ function openSW(id)
 //Checks user shop for an item
 function checkUserShop(item)
 {
-    console.log(item);
+    console.log("Item: " + item);
 
     var shop = window.open("https://neopetsclassic.com/market/");
     shop.addEventListener('load', ()=> {
@@ -51,7 +51,7 @@ function checkUserShop(item)
             }
             else
             {
-                console.log(item + " was NOT found in row " + listItem.innerText);
+                //console.log(item + " was NOT found in row " + listItem.innerText);
             }
         }
 
@@ -137,7 +137,25 @@ function makeLinks(parentDiv, item)
 
 function getKadItems()
 {
-    let kadTable = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div > table > tbody");
+    //2004 theme
+    var kadTable = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div > table > tbody");
+
+    if (kadTable === null)
+    {
+        console.log("null kadtable, checking again");
+        //standard themes
+        kadTable = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div > table")
+    }
+
+if (kadTable === null)
+    {
+    console.log("null kadtable after 2nd check, returning");
+        return
+    }
+
+    else
+    {
+
 
     for (let row of kadTable.rows)
     {
@@ -157,7 +175,7 @@ function getKadItems()
             }
         }
     }
-}
+}}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
