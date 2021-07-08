@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.5
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/games/kadoatery/
 // @include      *neopetsclassic.com/faerieland/employ/jobs/*
 // @include      *neopetsclassic.com/*
 // @include      *neopetsclassic.com/market/
+// @include      *neopetsclassic.com/safetydeposit/*
 // @icon         https://www.google.com/s2/favicons?domain=neopetsclassic.com
 // @updateURL    https://raw.githubusercontent.com/kreotsai/npcSearchHelper/main/npcSearchHelper.user.js
 // @downloadURL  https://raw.githubusercontent.com/kreotsai/npcSearchHelper/main/npcSearchHelper.user.js
@@ -16,6 +17,7 @@
 
 // *** CURRENTLY WORKING FOR: ****
 // Kadoatery
+// SDB
 // User Shop
 // Faerie Quests (RE's and dailies)
 // Employment Agency
@@ -302,7 +304,7 @@ if (window.location.href.includes("neopetsclassic.com/quests"))
 }
 
 /////////////////// **** SHOP **** /////////////////////////
-if (window.location.href.includes("https://neopetsclassic.com/market/"))
+if (window.location.href.includes("neopetsclassic.com/market/"))
     {
         var shop = window;
         var shopItems = getShopItems(shop)
@@ -322,7 +324,30 @@ if (window.location.href.includes("https://neopetsclassic.com/market/"))
 
         }
 
+    }
 
+/////////////////// **** SDB **** /////////////////////////
+if (window.location.href.includes("neopetsclassic.com/safetydeposit/"))
+    {
+        console.log("sdb");
 
+         var sdb = window;
+        var sdbItems = getShopItems(sdb)
+
+        if (sdbItems !== undefined)
+        {
+
+            for(var l = 0, sdbItem; sdbItem = sdbItems[l]; l++)
+            {
+
+                var sdbText = sdbItem.innerText
+                sdbText = sdbText.split("(")[0];
+
+               console.log(sdbText);
+
+                makeLinks(sdbItem, sdbText);
+            }
+
+        }
 
     }
