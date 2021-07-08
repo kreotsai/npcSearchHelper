@@ -1,18 +1,29 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/games/kadoatery/
+// @include      *neopetsclassic.com/faerieland/employ/jobs/*
+// @include      *neopetsclassic.com/*
+// @include      *neopetsclassic.com/market/
 // @icon         https://www.google.com/s2/favicons?domain=neopetsclassic.com
 // @updateURL    https://raw.githubusercontent.com/kreotsai/npcSearchHelper/main/npcSearchHelper.user.js
 // @downloadURL  https://raw.githubusercontent.com/kreotsai/npcSearchHelper/main/npcSearchHelper.user.js
 // @grant        none
 // ==/UserScript==
 
-// *** CURRENTLY ONLY WORKING AT THE KADOATERY ****
-//I'm planning on adding functionality soon for inventory, shop, SDB, FEA, or wherever else it's wanted :]
+// *** CURRENTLY WORKING FOR: ****
+// Kadoatery
+// User Shop
+// Faerie Quests (RE's and dailies)
+// Employment Agency
+
+//Soon I'll be adding Auction & TP search, as well as support for the training school.
+
+//If you encounter any bugs please don't hesitate to let me know!! I'm still learning and I appreciate the help :)
+//<3 plushies
 
 
 //Opens shop wiz, sets query to item name, sets search option to 'identical to my phrase'
@@ -23,8 +34,19 @@ function openSW(id)
     var wiz = window.open("https://neopetsclassic.com/market/wizard/");
     wiz.addEventListener('load', ()=> {
         console.log('wiz opened');
-        wiz.document.getElementsByName("query")[0].value=id;
-        wiz.document.getElementsByName("search_method")[0].selectedIndex = 1;
+
+        //Check if there's a quest
+        if (wiz.document.body.innerText.includes("You are on a Faerie Quest and are not allowed to use the Shop Wizard!"))
+        {
+            console.log("on a quest, can't use SW");
+
+        }
+        //No quest, do the search stuff
+        else
+        {
+            wiz.document.getElementsByName("query")[0].value=id;
+            wiz.document.getElementsByName("search_method")[0].selectedIndex = 1;
+        }
     }, false);
 
 }
@@ -39,23 +61,31 @@ function checkUserShop(item)
         console.log('shop opened');
         let shopItems = getShopItems(shop);
 
-        for(var i = 0, listItem; listItem = shopItems[i]; i++)
+        if (shopItems !== undefined)
         {
+            //console.log("shop here, continue");
 
-            if (listItem.innerText.includes(item))
+            for(var i = 0, listItem; listItem = shopItems[i]; i++)
             {
-                console.log(item + " was FOUND in row " + listItem.innerText + ", centering it on screen");
-                //console.log(listItem);
-                listItem.scrollIntoView({block: "center"});
-                return listItem
+
+                if (listItem.innerText.includes(item))
+                {
+                    console.log(item + " was FOUND in row " + listItem.innerText + ", centering it on screen");
+                    //console.log(listItem);
+                    listItem.scrollIntoView({block: "center"});
+                    return listItem
+                }
+                else
+                {
+                    //console.log(item + " was NOT found in row " + listItem.innerText);
+                }
             }
-            else
-            {
-                //console.log(item + " was NOT found in row " + listItem.innerText);
-            }
+
         }
-
-
+        else
+        {
+            //console.log("didnt find a shop");
+        }
 
 
 
@@ -69,43 +99,50 @@ function checkUserShop(item)
 
 function getShopItems(shop)
 {
-    var itemList = [];
-    var shopTable = shop.document.getElementsByClassName("sdbtablebody")
-    shopTable = shopTable[0]
-
-    for (var i = 0, row; row = shopTable.rows[i]; i++)
+    if (shop.document.body.innerText.includes("You don't have your own shop yet!"))
     {
-        var cellHTML = row
-        cellHTML = cellHTML.getElementsByTagName("td");
-
-
-        cellHTML = cellHTML[0];
-
-
-        var itemText = cellHTML.innerText;
-
-
-
-
-
-        if (itemText !== null)
-        {
-            if (!cellHTML.innerHTML.includes(`value="Update`))
-            {
-                itemList.push(cellHTML);
-            }
-        }
-
+        console.log("no shop")
     }
+    else
+    {
+        var itemList = [];
+        var shopTable = shop.document.getElementsByClassName("sdbtablebody")
+        shopTable = shopTable[0]
+
+        for (var i = 0, row; row = shopTable.rows[i]; i++)
+        {
+            var cellHTML = row
+
+
+            cellHTML = cellHTML.getElementsByTagName("td");
+
+
+            cellHTML = cellHTML[0];
+
+
+            var itemText = cellHTML.innerText;
+
+            if (itemText !== null)
+            {
+                if (!cellHTML.innerHTML.includes(`value="Update`))
+                {
+                    itemList.push(cellHTML);
+                }
+            }
+
+        }
     return itemList
 
+    }
 }
-
 
 function makeLinks(parentDiv, item)
 {
     //im dumb and can't figure out escape chars so here's how to make items with "'" in the name work, if someone can fix this plz do lmao
-    item = item.replace("'", "%27");
+    if (item.includes("'"))
+        {
+        item = item.replace("'", "%27");
+        }
 
     //div to hold all the other link divs. (Links are in divs so I can more easily add event listeners to them)
     var linksDiv = document.createElement("div");
@@ -176,11 +213,116 @@ if (kadTable === null)
         }
     }
 }}
+////////////////////////////////////////////////////****   FEA   **** //////////////////////////////////////
+
+if (window.location.href.includes("neopetsclassic.com/faerieland/employ/jobs/"))
+{
+
+//Get the table where the items for sale are listed, store as var 'itemTable'
+var itemTable = document.getElementsByClassName("content")[0];
+itemTable = itemTable.getElementsByTagName("tbody")[0];
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+for (var i = 0, row; row = itemTable.rows[i]; i++)
+{
+ if(row.innerHTML.indexOf("img src") !== -1)
+ {
+   var itemPic = row.getElementsByTagName("img")[0].getAttribute("src");
+ }
+ if(row.innerHTML.indexOf("Base Reward") !== -1)
+    {
+    //Parse out job info from itemTable
+    var item = row.innerHTML.split("of:</b> ");
+        item = item[1].split("          <br><br>")[0];
+        item = item.replace(/\r?\n|\r/g, "");
+        console.log(item);
+
+        makeLinks(row, item)
+    }
+
+}
+}
+
+/////////////////////////////////////////****   KADS   **** //////////////////////////////////////
 if (window.location.href.includes("neopetsclassic.com/games/kadoatery/"))
 {
     getKadItems();
 }
 
+/////////////////////////////////////////****   QUESTS   **** //////////////////////////////////////
+//all pages, quest REs
+
+var fqRE = document.getElementsByClassName("faerie_quest")[0]
+
+console.log("initial fqRE = " + fqRE);
+
+if (fqRE === undefined)
+    {
+        console.log("no quest RE here")
+    }
+
+//when there is a FQ RE
+    else
+    {
+        console.log("else fqRE = " + fqRE.innerHTML);
+
+        if(fqRE.innerHTML.indexOf("<b>'") !== -1)
+        {
+            var questItem = fqRE.getElementsByTagName("b")[1].innerText;
+            questItem = questItem.replace("'", "");
+            questItem = questItem.replace("'", "");
+            console.log(questItem);
+
+            makeLinks(fqRE, questItem);
+        }
+
+    }
+
+//quest page
+if (window.location.href.includes("neopetsclassic.com/quests"))
+{
+    console.log("quest page");
+    var ps = document.getElementsByTagName("p");
+
+    for (var j = 0, p; p = ps[j]; j++)
+    {
+
+    if(ps[j].innerHTML.indexOf("You are currently on a quest!") !== -1)
+        {
+            questItem = ps[j+1].innerText;
+            questItem = questItem.split("brought my ")[1];
+            questItem = questItem.split(" back yet?")[0];
+            console.log(questItem);
+
+            makeLinks(ps[j+1], questItem)
+        }
+
+    }
+
+}
+
+/////////////////// **** SHOP **** /////////////////////////
+if (window.location.href.includes("https://neopetsclassic.com/market/"))
+    {
+        var shop = window;
+        var shopItems = getShopItems(shop)
+
+        if (shopItems !== undefined)
+        {
+
+            for(var k = 0, listItem; listItem = shopItems[k]; k++)
+            {
+                console.log(listItem.innerText)
+                var itemText = listItem.innerText
+
+                //console.log(itemText);
+
+                makeLinks(listItem, itemText);
+            }
+
+        }
+
+
+
+
+    }
