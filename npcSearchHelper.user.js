@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/games/kadoatery/
@@ -18,7 +18,7 @@
 //Opens shop wiz, sets query to item name, sets search option to 'identical to my phrase'
 function openSW(id)
 {
-    console.log(id);
+    console.log("Item: " + id);
 
     var wiz = window.open("https://neopetsclassic.com/market/wizard/");
     wiz.addEventListener('load', ()=> {
