@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.6
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/games/kadoatery/
@@ -9,14 +9,18 @@
 // @include      *neopetsclassic.com/*
 // @include      *neopetsclassic.com/market/
 // @include      *neopetsclassic.com/safetydeposit/*
+// @include      *neopetsclassic.com/inventory/*
 // @icon         https://www.google.com/s2/favicons?domain=neopetsclassic.com
 // @updateURL    https://raw.githubusercontent.com/kreotsai/npcSearchHelper/main/npcSearchHelper.user.js
 // @downloadURL  https://raw.githubusercontent.com/kreotsai/npcSearchHelper/main/npcSearchHelper.user.js
 // @grant        none
 // ==/UserScript==
 
+/////////////////// **** NOTES **** /////////////////////////
+
 // *** CURRENTLY WORKING FOR: ****
 // Kadoatery
+// Inventory
 // SDB
 // User Shop
 // Faerie Quests (RE's and dailies)
@@ -27,7 +31,7 @@
 //If you encounter any bugs please don't hesitate to let me know!! I'm still learning and I appreciate the help :)
 //<3 plushies
 
-
+/////////////////// **** FUNCTIONS **** /////////////////////////
 //Opens shop wiz, sets query to item name, sets search option to 'identical to my phrase'
 function openSW(id)
 {
@@ -56,6 +60,9 @@ function openSW(id)
 //Checks user shop for an item
 function checkUserShop(item)
 {
+    //remove any newlines
+    item = item.replace(/(\r\n|\n|\r)/gm, "");
+
     console.log("Item: " + item);
 
     var shop = window.open("https://neopetsclassic.com/market/");
@@ -65,28 +72,28 @@ function checkUserShop(item)
 
         if (shopItems !== undefined)
         {
-            //console.log("shop here, continue");
+            console.log("shop here, continue");
 
             for(var i = 0, listItem; listItem = shopItems[i]; i++)
             {
 
                 if (listItem.innerText.includes(item))
                 {
-                    console.log(item + " was FOUND in row " + listItem.innerText + ", centering it on screen");
+                    console.log("["+ item + "] was FOUND in row [" + listItem.innerText + "] , centering it on screen");
                     //console.log(listItem);
                     listItem.scrollIntoView({block: "center"});
                     return listItem
                 }
                 else
                 {
-                    //console.log(item + " was NOT found in row " + listItem.innerText);
+                    console.log("["+ item + "] was NOT found in row [" + listItem.innerText + "]");
                 }
             }
 
         }
         else
         {
-            //console.log("didnt find a shop");
+            console.log("didnt find a shop");
         }
 
 
@@ -331,7 +338,7 @@ if (window.location.href.includes("neopetsclassic.com/safetydeposit/"))
     {
         console.log("sdb");
 
-         var sdb = window;
+        var sdb = window;
         var sdbItems = getShopItems(sdb)
 
         if (sdbItems !== undefined)
@@ -351,3 +358,35 @@ if (window.location.href.includes("neopetsclassic.com/safetydeposit/"))
         }
 
     }
+
+
+
+/////////////////// **** INVENTORY **** /////////////////////////
+if (window.location.href.includes("neopetsclassic.com/inventory/"))
+    {
+        console.log("inventory");
+
+        var inv = window;
+        var invItems = inv.document.getElementsByClassName("inventoryitem")
+
+        if (invItems !== undefined)
+        {
+
+            for(var m = 0, invItem; invItem = invItems[m]; m++)
+            {
+
+                var invText = invItem.innerText
+                invText = invText.split("(")[0];
+
+               console.log(invText);
+
+               makeLinks(invItem, invText);
+            }
+
+        }
+
+    }
+
+
+
+
