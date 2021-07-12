@@ -41,7 +41,7 @@ function openSW(id)
         }
     
     console.log("Item: " + id);
-
+    id = id.replace("%27", "'");
     var wiz = window.open("https://neopetsclassic.com/market/wizard/");
     wiz.addEventListener('load', ()=> {
         console.log('wiz opened');
