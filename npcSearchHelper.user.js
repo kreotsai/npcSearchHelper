@@ -1,15 +1,10 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.8
+// @version      0.9
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
-// @include      *neopetsclassic.com/games/kadoatery/
-// @include      *neopetsclassic.com/faerieland/employ/jobs/*
 // @include      *neopetsclassic.com/*
-// @include      *neopetsclassic.com/market/
-// @include      *neopetsclassic.com/safetydeposit/*
-// @include      *neopetsclassic.com/inventory/*
 // @icon         https://www.google.com/s2/favicons?domain=neopetsclassic.com
 // @updateURL    https://raw.githubusercontent.com/kreotsai/npcSearchHelper/main/npcSearchHelper.user.js
 // @downloadURL  https://raw.githubusercontent.com/kreotsai/npcSearchHelper/main/npcSearchHelper.user.js
@@ -17,6 +12,7 @@
 // ==/UserScript==
 
 /////////////////// **** NOTES **** /////////////////////////
+//  Updated 9/19/21
 
 // *** CURRENTLY WORKING FOR: ****
 // Kadoatery
@@ -25,13 +21,99 @@
 // User Shop
 // Faerie Quests (RE's and dailies)
 // Employment Agency
+// Mystery Island Training School
+// Trading Post
+// Auctions
 
-//Soon I'll be adding Auction & TP search, as well as support for the training school.
 
 //If you encounter any bugs please don't hesitate to let me know!! I'm still learning and I appreciate the help :)
 //<3 plushies
 
 /////////////////// **** FUNCTIONS **** /////////////////////////
+
+
+//Function to add search links to items
+function makeLinks(parentDiv, item, shop = false)
+{
+    //im dumb and can't figure out escape chars so here's how to make items with "'" in the name work, if someone can fix this plz do lmao
+    if (item.includes("'"))
+        {
+        item = item.replace("'", "%27");
+        }
+
+    //div to hold all the other link divs. (Links are in divs so I can more easily add event listeners to them)
+    var linksDiv = document.createElement("div");
+    linksDiv.id = item;
+
+    //sw
+    var swDiv = document.createElement("swDiv");
+    swDiv.innerHTML = `<a style='font-size:20px;font-weight:100;z-index:900'><img width="20px" id='${item}'src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shopwiz.gif"> </a>`;
+    swDiv.addEventListener("click", function(e) {
+        openSW(e.target.id);
+    })
+    linksDiv.appendChild(swDiv);
+console.log(shop)
+if (shop == true)
+{
+        //user shop
+    var shopDiv = document.createElement("shopDiv");
+    shopDiv.innerHTML = `<a style='font-size:20px;font-weight:100'><img width="20px" id='${item}'src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shop.gif"> </a>`;
+    shopDiv.addEventListener("click", function(e) {
+        checkUserShop(e.target.id);
+    })
+    linksDiv.appendChild(shopDiv);
+}
+
+
+    //sdb
+    var sdbDiv = document.createElement("sdbDiv");
+    sdbDiv.innerHTML = `<a target="_blank" href='https://neopetsclassic.com/safetydeposit/?page=1&query=${item}'style='font-size:20px;font-weight:100'><img width="20px" src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/emptydepositbox.gif"> </a>`;
+    linksDiv.appendChild(sdbDiv);
+
+    //tp
+    var tpDiv = document.createElement("tpDiv");
+    tpDiv.innerHTML = `<a style='font-size:20px;font-weight:100'><img width="20px" id='${item}'src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/trade_offer.png"> </a>`;
+    tpDiv.addEventListener("click", function(e) {
+        openTP(e.target.id);
+    })
+    linksDiv.appendChild(tpDiv);
+
+
+ //append div
+
+      parentDiv.appendChild(linksDiv);
+        return linksDiv
+    }
+
+   
+
+
+
+
+
+
+//Opens tp, sets query to item name, sets search option to 'identical to my phrase'
+function openTP(id)
+{
+    if (id.includes("%27"))
+        {
+        id = id.replace("%27", "'");
+        }
+
+    console.log("Item: " + id);
+    id = id.replace("%27", "'");
+    var tp = window.open("https://neopetsclassic.com/island/tradingpost/browse/");
+    tp.addEventListener('load', ()=> {
+        console.log('tp opened');
+           tp.document.getElementsByName("query")[0].value=id;
+           tp.document.getElementsByName("category")[0].selectedIndex = 1;
+
+    }, false);
+
+}
+
+
+
 //Opens shop wiz, sets query to item name, sets search option to 'identical to my phrase'
 function openSW(id)
 {
@@ -120,12 +202,12 @@ function getShopItems(shop)
     else
     {
         var itemList = [];
-        var shopTable = shop.document.getElementsByClassName("sdbtablebody")
-        shopTable = shopTable[0]
+        var shopTable = shop.document.getElementsByClassName("sdbtablebody");
+        shopTable = shopTable[0];
 
         for (var i = 0, row; row = shopTable.rows[i]; i++)
         {
-            var cellHTML = row
+            var cellHTML = row;
 
 
             cellHTML = cellHTML.getElementsByTagName("td");
@@ -150,41 +232,7 @@ function getShopItems(shop)
     }
 }
 
-function makeLinks(parentDiv, item)
-{
-    //im dumb and can't figure out escape chars so here's how to make items with "'" in the name work, if someone can fix this plz do lmao
-    if (item.includes("'"))
-        {
-        item = item.replace("'", "%27");
-        }
 
-    //div to hold all the other link divs. (Links are in divs so I can more easily add event listeners to them)
-    var linksDiv = document.createElement("div");
-    linksDiv.id = item;
-    parentDiv.appendChild(linksDiv);
-
-    //sw
-    var swDiv = document.createElement("swDiv");
-    swDiv.innerHTML = `<a style='font-size:20px;font-weight:100'><img width="20px" id='${item}'src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shopwiz.gif"></a>`;
-    swDiv.addEventListener("click", function(e) {
-        openSW(e.target.id);
-    })
-    linksDiv.appendChild(swDiv);
-
-
-    //user shop
-    var shopDiv = document.createElement("shopDiv");
-    shopDiv.innerHTML = `<a style='font-size:20px;font-weight:100'><img width="20px" id='${item}'src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shop.gif"></a>`;
-    shopDiv.addEventListener("click", function(e) {
-        checkUserShop(e.target.id);
-    })
-    linksDiv.appendChild(shopDiv);
-
-    //sdb
-    var sdbDiv = document.createElement("sdbDiv");
-    sdbDiv.innerHTML = `<a target="_blank" href='https://neopetsclassic.com/safetydeposit/?page=1&query=${item}'style='font-size:20px;font-weight:100'><img width="20px" src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/emptydepositbox.gif"></a>`;
-    linksDiv.appendChild(sdbDiv);
-}
 
 function getKadItems()
 {
@@ -221,7 +269,7 @@ if (kadTable === null)
 
                 //console.log(food);
 
-                makeLinks(cell, food)
+                makeLinks(cell, food, true)
 
             }
         }
@@ -239,6 +287,7 @@ itemTable = itemTable.getElementsByTagName("tbody")[0];
 
 for (var i = 0, row; row = itemTable.rows[i]; i++)
 {
+
  if(row.innerHTML.indexOf("img src") !== -1)
  {
    var itemPic = row.getElementsByTagName("img")[0].getAttribute("src");
@@ -246,12 +295,21 @@ for (var i = 0, row; row = itemTable.rows[i]; i++)
  if(row.innerHTML.indexOf("Base Reward") !== -1)
     {
     //Parse out job info from itemTable
-    var item = row.innerHTML.split("of:</b> ");
+    var item = row.getElementsByTagName("td")[0];
+
+        item = row.innerHTML.split("of:</b> ");
         item = item[1].split("          <br><br>")[0];
         item = item.replace(/\r?\n|\r/g, "");
         console.log(item);
 
-        makeLinks(row, item)
+
+
+
+
+makeLinks(row, item);
+
+
+        
     }
 
 }
@@ -267,8 +325,6 @@ if (window.location.href.includes("neopetsclassic.com/games/kadoatery/"))
 //all pages, quest REs
 
 var fqRE = document.getElementsByClassName("faerie_quest")[0]
-
-console.log("initial fqRE = " + fqRE);
 
 if (fqRE === undefined)
     {
@@ -287,7 +343,7 @@ if (fqRE === undefined)
             questItem = questItem.replace("'", "");
             console.log(questItem);
 
-            makeLinks(fqRE, questItem);
+            makeLinks(fqRE, questItem, true);
         }
 
     }
@@ -393,5 +449,85 @@ if (window.location.href.includes("neopetsclassic.com/inventory/"))
     }
 
 
+/////////////////// **** MYSTERY ISLAND SCHOOL **** /////////////////////////
+if (window.location.href.includes("neopetsclassic.com/island/training/status/"))
+    {
+        console.log("mystery island training");
 
+        var codestones = document.getElementsByTagName("b")
+
+        for(var c = 0, codestone; codestone = codestones[c]; c++)
+            {
+                if (codestone.innerText.includes("Codestone"))
+                {
+                var csName = codestone.innerText
+                makeLinks(codestone, csName);
+                }
+            }
+    }
+
+
+
+/////////////////// **** AUCTIONS **** /////////////////////////
+if (window.location.href.includes("neopetsclassic.com/auctions/view/?auction_id="))
+    {
+        console.log("auction page");
+        var auctionItem = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div.content > div:nth-child(4) > p:nth-child(4) > b");
+
+
+
+           if (auctionItem === null)
+    {
+        console.log("null auction item, checking again");
+        //standard themes
+        auctionItem = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div.content > div:nth-child(4) > p:nth-child(4) > b");
+    }
+
+if (auctionItem === null)
+    {
+    console.log("auction item after 2nd check, returning");
+        return
+    }
+
+    else
+    {
+
+
+        var aucName = auctionItem.innerText.split(" (owned by")[0];
+        makeLinks(auctionItem, aucName, true);
+
+        console.log(aucName);
+
+
+    }
+
+    }
+
+
+
+/////////////////// **** TRADING POST **** /////////////////////////
+if (window.location.href.includes("neopetsclassic.com/island/tradingpost/browse/"))
+    {
+        console.log("trading post");
+
+        var tpItems = document.getElementsByClassName("tradingPostTable");
+            tpItems = tpItems[0].getElementsByTagName("td");
+
+        for(var tpi = 0, tpItem; tpItem = tpItems[tpi]; tpi++)
+            {
+                if (tpItem.innerHTML.includes(`<img src="/images/items`))
+                {
+                var tpName = tpItem.innerText;
+
+                    if (tpName[0] == " ")
+                    {
+                        tpName = tpName.substring(1);
+                    }
+                var tpLinksDiv = makeLinks(tpItem, tpName);
+                    tpLinksDiv.style = "float:right;"
+
+
+                }
+            }
+    }
 
