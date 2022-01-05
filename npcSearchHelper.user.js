@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      0.9
+// @version      1.0
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/*
@@ -24,7 +24,7 @@
 // Mystery Island Training School
 // Trading Post
 // Auctions
-
+// Esophagor
 
 //If you encounter any bugs please don't hesitate to let me know!! I'm still learning and I appreciate the help :)
 //<3 plushies
@@ -531,3 +531,21 @@ if (window.location.href.includes("neopetsclassic.com/island/tradingpost/browse/
             }
     }
 
+/////////////////////////////////////////****   Esophagor   **** //////////////////////////////////////
+if (window.location.href.includes("neopetsclassic.com/halloween/esophagor/")) {
+    var tbl = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div > table > tbody");
+    if (tbl === null) {
+        //standard themes
+        tbl = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div > table")
+    }
+    if (tbl === null) {
+        return;
+    } else {
+        for (let row of tbl.rows) {
+            for (let cell of row.cells) {
+                let food = cell.innerText;
+                makeLinks(cell, food, true)
+            }
+        }
+    }
+}
