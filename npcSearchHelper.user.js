@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.5
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/*
@@ -25,6 +25,8 @@
 // Trading Post
 // Auctions
 // Esophagor
+// Tarla
+// Snow Faerie Quests
 
 //If you encounter any bugs please don't hesitate to let me know!! I'm still learning and I appreciate the help :)
 //<3 plushies
@@ -33,13 +35,11 @@
 
 
 //Function to add search links to items
-function makeLinks(parentDiv, item, shop = false)
-{
+function makeLinks(parentDiv, item, shop = false) {
     //im dumb and can't figure out escape chars so here's how to make items with "'" in the name work, if someone can fix this plz do lmao
-    if (item.includes("'"))
-        {
+    if (item.includes("'")) {
         item = item.replace("'", "%27");
-        }
+    }
 
     //div to hold all the other link divs. (Links are in divs so I can more easily add event listeners to them)
     var linksDiv = document.createElement("div");
@@ -52,17 +52,16 @@ function makeLinks(parentDiv, item, shop = false)
         openSW(e.target.id);
     })
     linksDiv.appendChild(swDiv);
-console.log(shop)
-if (shop == true)
-{
+    //console.log(shop)
+    if (shop == true) {
         //user shop
-    var shopDiv = document.createElement("shopDiv");
-    shopDiv.innerHTML = `<a style='font-size:20px;font-weight:100'><img width="20px" id='${item}'src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shop.gif"> </a>`;
-    shopDiv.addEventListener("click", function(e) {
-        checkUserShop(e.target.id);
-    })
-    linksDiv.appendChild(shopDiv);
-}
+        var shopDiv = document.createElement("shopDiv");
+        shopDiv.innerHTML = `<a style='font-size:20px;font-weight:100'><img width="20px" id='${item}'src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shop.gif"> </a>`;
+        shopDiv.addEventListener("click", function(e) {
+            checkUserShop(e.target.id);
+        })
+        linksDiv.appendChild(shopDiv);
+    }
 
 
     //sdb
@@ -79,34 +78,28 @@ if (shop == true)
     linksDiv.appendChild(tpDiv);
 
 
- //append div
+    //append div
 
-      parentDiv.appendChild(linksDiv);
-        return linksDiv
-    }
-
-   
-
-
+    parentDiv.appendChild(linksDiv);
+    return linksDiv
+}
 
 
 
 
 //Opens tp, sets query to item name, sets search option to 'identical to my phrase'
-function openTP(id)
-{
-    if (id.includes("%27"))
-        {
+function openTP(id) {
+    if (id.includes("%27")) {
         id = id.replace("%27", "'");
-        }
+    }
 
     console.log("Item: " + id);
     id = id.replace("%27", "'");
     var tp = window.open("https://neopetsclassic.com/island/tradingpost/browse/");
-    tp.addEventListener('load', ()=> {
+    tp.addEventListener('load', () => {
         console.log('tp opened');
-           tp.document.getElementsByName("query")[0].value=id;
-           tp.document.getElementsByName("category")[0].selectedIndex = 1;
+        tp.document.getElementsByName("query")[0].value = id;
+        tp.document.getElementsByName("category")[0].selectedIndex = 1;
 
     }, false);
 
@@ -115,29 +108,25 @@ function openTP(id)
 
 
 //Opens shop wiz, sets query to item name, sets search option to 'identical to my phrase'
-function openSW(id)
-{
-    if (id.includes("%27"))
-        {
+function openSW(id) {
+    if (id.includes("%27")) {
         id = id.replace("%27", "'");
-        }
-    
+    }
+
     console.log("Item: " + id);
     id = id.replace("%27", "'");
     var wiz = window.open("https://neopetsclassic.com/market/wizard/");
-    wiz.addEventListener('load', ()=> {
+    wiz.addEventListener('load', () => {
         console.log('wiz opened');
 
         //Check if there's a quest
-        if (wiz.document.body.innerText.includes("You are on a Faerie Quest and are not allowed to use the Shop Wizard!"))
-        {
+        if (wiz.document.body.innerText.includes("You are on a Faerie Quest and are not allowed to use the Shop Wizard!")) {
             console.log("on a quest, can't use SW");
 
         }
         //No quest, do the search stuff
-        else
-        {
-            wiz.document.getElementsByName("query")[0].value=id;
+        else {
+            wiz.document.getElementsByName("query")[0].value = id;
             wiz.document.getElementsByName("search_method")[0].selectedIndex = 1;
         }
     }, false);
@@ -145,41 +134,35 @@ function openSW(id)
 }
 
 //Checks user shop for an item
-function checkUserShop(item)
-{
+function checkUserShop(item) {
     //remove any newlines
     item = item.replace(/(\r\n|\n|\r)/gm, "");
 
     console.log("Item: " + item);
 
     var shop = window.open("https://neopetsclassic.com/market/");
-    shop.addEventListener('load', ()=> {
+    shop.addEventListener('load', () => {
         console.log('shop opened');
         let shopItems = getShopItems(shop);
 
-        if (shopItems !== undefined)
-        {
+        if (shopItems !== undefined) {
             console.log("shop here, continue");
 
-            for(var i = 0, listItem; listItem = shopItems[i]; i++)
-            {
+            for (var i = 0, listItem; listItem = shopItems[i]; i++) {
 
-                if (listItem.innerText.includes(item))
-                {
-                    console.log("["+ item + "] was FOUND in row [" + listItem.innerText + "] , centering it on screen");
+                if (listItem.innerText.includes(item)) {
+                    console.log("[" + item + "] was FOUND in row [" + listItem.innerText + "] , centering it on screen");
                     //console.log(listItem);
-                    listItem.scrollIntoView({block: "center"});
+                    listItem.scrollIntoView({
+                        block: "center"
+                    });
                     return listItem
-                }
-                else
-                {
-                    console.log("["+ item + "] was NOT found in row [" + listItem.innerText + "]");
+                } else {
+                    console.log("[" + item + "] was NOT found in row [" + listItem.innerText + "]");
                 }
             }
 
-        }
-        else
-        {
+        } else {
             console.log("didnt find a shop");
         }
 
@@ -193,20 +176,15 @@ function checkUserShop(item)
 
 
 
-function getShopItems(shop)
-{
-    if (shop.document.body.innerText.includes("You don't have your own shop yet!"))
-    {
+function getShopItems(shop) {
+    if (shop.document.body.innerText.includes("You don't have your own shop yet!")) {
         console.log("no shop")
-    }
-    else
-    {
+    } else {
         var itemList = [];
         var shopTable = shop.document.getElementsByClassName("sdbtablebody");
         shopTable = shopTable[0];
 
-        for (var i = 0, row; row = shopTable.rows[i]; i++)
-        {
+        for (var i = 0, row; row = shopTable.rows[i]; i++) {
             var cellHTML = row;
 
 
@@ -218,106 +196,90 @@ function getShopItems(shop)
 
             var itemText = cellHTML.innerText;
 
-            if (itemText !== null)
-            {
-                if (!cellHTML.innerHTML.includes(`value="Update`))
-                {
+            if (itemText !== null) {
+                if (!cellHTML.innerHTML.includes(`value="Update`)) {
                     itemList.push(cellHTML);
                 }
             }
 
         }
-    return itemList
+        return itemList
 
     }
 }
 
 
 
-function getKadItems()
-{
+function getKadItems() {
     //2004 theme
     var kadTable = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div > table > tbody");
 
-    if (kadTable === null)
-    {
+    if (kadTable === null) {
         console.log("null kadtable, checking again");
         //standard themes
         kadTable = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div > table")
     }
 
-if (kadTable === null)
-    {
-    console.log("null kadtable after 2nd check, returning");
+    if (kadTable === null) {
+        console.log("null kadtable after 2nd check, returning");
         return
-    }
-
-    else
-    {
+    } else {
 
 
-    for (let row of kadTable.rows)
-    {
-        for(let cell of row.cells)
-        {
-            let food = cell.innerText;
+        for (let row of kadTable.rows) {
+            for (let cell of row.cells) {
+                let food = cell.innerText;
 
-            if (food.includes("You should give it"))
-            {
-                food = food.split("is very sad.\n\n\nYou should give it\n")
-                food = food[1];
+                if (food.includes("You should give it")) {
+                    food = food.split("is very sad.\n\n\nYou should give it\n")
+                    food = food[1];
 
-                //console.log(food);
+                    //console.log(food);
 
-                makeLinks(cell, food, true)
+                    makeLinks(cell, food, true)
 
+                }
             }
         }
     }
-}}
+}
 ////////////////////////////////////////////////////****   FEA   **** //////////////////////////////////////
 
-if (window.location.href.includes("neopetsclassic.com/faerieland/employ/jobs/"))
-{
+if (window.location.href.includes("neopetsclassic.com/faerieland/employ/jobs/")) {
 
-//Get the table where the items for sale are listed, store as var 'itemTable'
-var itemTable = document.getElementsByClassName("content")[0];
-itemTable = itemTable.getElementsByTagName("tbody")[0];
+    //Get the table where the items for sale are listed, store as var 'itemTable'
+    var itemTable = document.getElementsByClassName("content")[0];
+    itemTable = itemTable.getElementsByTagName("tbody")[0];
 
 
-for (var i = 0, row; row = itemTable.rows[i]; i++)
-{
+    for (var i = 0, row; row = itemTable.rows[i]; i++) {
 
- if(row.innerHTML.indexOf("img src") !== -1)
- {
-   var itemPic = row.getElementsByTagName("img")[0].getAttribute("src");
- }
- if(row.innerHTML.indexOf("Base Reward") !== -1)
-    {
-    //Parse out job info from itemTable
-    var item = row.getElementsByTagName("td")[0];
+        if (row.innerHTML.indexOf("img src") !== -1) {
+            var itemPic = row.getElementsByTagName("img")[0].getAttribute("src");
+        }
+        if (row.innerHTML.indexOf("Base Reward") !== -1) {
+            //Parse out job info from itemTable
+            var item = row.getElementsByTagName("td")[0];
 
-        item = row.innerHTML.split("of:</b> ");
-        item = item[1].split("          <br><br>")[0];
-        item = item.replace(/\r?\n|\r/g, "");
-        console.log(item);
+            item = row.innerHTML.split("of:</b> ");
+            item = item[1].split("          <br><br>")[0];
+            item = item.replace(/\r?\n|\r/g, "");
+            console.log(item);
 
 
 
 
+            makeLinks(row, item);
 
-makeLinks(row, item);
 
 
-        
+        }
+
     }
-
-}
 }
 
 /////////////////////////////////////////****   KADS   **** //////////////////////////////////////
-if (window.location.href.includes("neopetsclassic.com/games/kadoatery/"))
-{
+if (window.location.href.includes("neopetsclassic.com/games/kadoatery/")) {
     getKadItems();
 }
 
@@ -326,45 +288,39 @@ if (window.location.href.includes("neopetsclassic.com/games/kadoatery/"))
 
 var fqRE = document.getElementsByClassName("faerie_quest")[0]
 
-if (fqRE === undefined)
-    {
-        console.log("no quest RE here")
-    }
+if (fqRE === undefined) {
+    console.log("no quest RE here")
+}
 
 //when there is a FQ RE
-    else
-    {
-        console.log("else fqRE = " + fqRE.innerHTML);
+else {
+    console.log("else fqRE = " + fqRE.innerHTML);
 
-        if(fqRE.innerHTML.indexOf("<b>'") !== -1)
-        {
-            var questItem = fqRE.getElementsByTagName("b")[1].innerText;
-            questItem = questItem.replace("'", "");
-            questItem = questItem.replace("'", "");
-            console.log(questItem);
+    if (fqRE.innerHTML.indexOf("<b>'") !== -1) {
+        var questItem = fqRE.getElementsByTagName("b")[1].innerText;
+        questItem = questItem.replace("'", "");
+        questItem = questItem.replace("'", "");
+        console.log(questItem);
 
-            makeLinks(fqRE, questItem, true);
-        }
-
+        makeLinks(fqRE, questItem, true);
     }
 
+}
+
 //quest page
-if (window.location.href.includes("neopetsclassic.com/quests"))
-{
+if (window.location.href.includes("neopetsclassic.com/quests")) {
     console.log("quest page");
     var ps = document.getElementsByTagName("p");
 
-    for (var j = 0, p; p = ps[j]; j++)
-    {
+    for (var j = 0, p; p = ps[j]; j++) {
 
-    if(ps[j].innerHTML.indexOf("You are currently on a quest!") !== -1)
-        {
-            questItem = ps[j+1].innerText;
+        if (ps[j].innerHTML.indexOf("You are currently on a quest!") !== -1) {
+            questItem = ps[j + 1].innerText;
             questItem = questItem.split("brought my ")[1];
             questItem = questItem.split(" back yet?")[0];
             console.log(questItem);
 
-            makeLinks(ps[j+1], questItem)
+            makeLinks(ps[j + 1], questItem)
         }
 
     }
@@ -372,125 +328,107 @@ if (window.location.href.includes("neopetsclassic.com/quests"))
 }
 
 /////////////////// **** SHOP **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/market/"))
-    {
-        var shop = window;
-        var shopItems = getShopItems(shop)
+if (window.location.href.includes("neopetsclassic.com/market/")) {
+    var shop = window;
+    var shopItems = getShopItems(shop)
 
-        if (shopItems !== undefined)
-        {
+    if (shopItems !== undefined) {
 
-            for(var k = 0, listItem; listItem = shopItems[k]; k++)
-            {
-                console.log(listItem.innerText)
-                var itemText = listItem.innerText
+        for (var k = 0, listItem; listItem = shopItems[k]; k++) {
+            console.log(listItem.innerText)
+            var itemText = listItem.innerText
 
-                //console.log(itemText);
+            //console.log(itemText);
 
-                makeLinks(listItem, itemText);
-            }
-
+            makeLinks(listItem, itemText);
         }
 
     }
+
+}
 
 /////////////////// **** SDB **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/safetydeposit/"))
-    {
-        console.log("sdb");
+if (window.location.href.includes("neopetsclassic.com/safetydeposit/")) {
+    console.log("sdb");
 
-        var sdb = window;
-        var sdbItems = getShopItems(sdb)
+    var sdb = window;
+    var sdbItems = getShopItems(sdb)
 
-        if (sdbItems !== undefined)
-        {
+    if (sdbItems !== undefined) {
 
-            for(var l = 0, sdbItem; sdbItem = sdbItems[l]; l++)
-            {
+        for (var l = 0, sdbItem; sdbItem = sdbItems[l]; l++) {
 
-                var sdbText = sdbItem.innerText
-                sdbText = sdbText.split("(")[0];
+            var sdbText = sdbItem.innerText
+            sdbText = sdbText.split("(")[0];
 
-               console.log(sdbText);
+            console.log(sdbText);
 
-                makeLinks(sdbItem, sdbText);
-            }
-
+            makeLinks(sdbItem, sdbText);
         }
 
     }
+
+}
 
 
 
 /////////////////// **** INVENTORY **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/inventory/"))
-    {
-        console.log("inventory");
+if (window.location.href.includes("neopetsclassic.com/inventory/")) {
+    console.log("inventory");
 
-        var inv = window;
-        var invItems = inv.document.getElementsByClassName("inventoryitem")
+    var inv = window;
+    var invItems = inv.document.getElementsByClassName("inventoryitem")
 
-        if (invItems !== undefined)
-        {
+    if (invItems !== undefined) {
 
-            for(var m = 0, invItem; invItem = invItems[m]; m++)
-            {
+        for (var m = 0, invItem; invItem = invItems[m]; m++) {
 
-                var invText = invItem.innerText
-                invText = invText.split("(")[0];
+            var invText = invItem.innerText
+            invText = invText.split("(")[0];
 
-               console.log(invText);
+            console.log(invText);
 
-               makeLinks(invItem, invText);
-            }
-
+            makeLinks(invItem, invText);
         }
 
     }
 
+}
+
 
 /////////////////// **** MYSTERY ISLAND SCHOOL **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/island/training/status/"))
-    {
-        console.log("mystery island training");
+if (window.location.href.includes("neopetsclassic.com/island/training/status/")) {
+    console.log("mystery island training");
 
-        var codestones = document.getElementsByTagName("b")
+    var codestones = document.getElementsByTagName("b")
 
-        for(var c = 0, codestone; codestone = codestones[c]; c++)
-            {
-                if (codestone.innerText.includes("Codestone"))
-                {
-                var csName = codestone.innerText
-                makeLinks(codestone, csName);
-                }
-            }
+    for (var c = 0, codestone; codestone = codestones[c]; c++) {
+        if (codestone.innerText.includes("Codestone")) {
+            var csName = codestone.innerText
+            makeLinks(codestone, csName);
+        }
     }
+}
 
 
 
 /////////////////// **** AUCTIONS **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/auctions/view/?auction_id="))
-    {
-        console.log("auction page");
-        var auctionItem = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div.content > div:nth-child(4) > p:nth-child(4) > b");
+if (window.location.href.includes("neopetsclassic.com/auctions/view/?auction_id=")) {
+    console.log("auction page");
+    var auctionItem = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div.content > div:nth-child(4) > p:nth-child(4) > b");
 
 
 
-           if (auctionItem === null)
-    {
+    if (auctionItem === null) {
         console.log("null auction item, checking again");
         //standard themes
         auctionItem = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div.content > div:nth-child(4) > p:nth-child(4) > b");
     }
 
-if (auctionItem === null)
-    {
-    console.log("auction item after 2nd check, returning");
+    if (auctionItem === null) {
+        console.log("auction item after 2nd check, returning");
         return
-    }
-
-    else
-    {
+    } else {
 
 
         var aucName = auctionItem.innerText.split(" (owned by")[0];
@@ -501,35 +439,31 @@ if (auctionItem === null)
 
     }
 
-    }
+}
 
 
 
 /////////////////// **** TRADING POST **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/island/tradingpost/browse/"))
-    {
-        console.log("trading post");
+if (window.location.href.includes("neopetsclassic.com/island/tradingpost/browse/")) {
+    console.log("trading post");
 
-        var tpItems = document.getElementsByClassName("tradingPostTable");
-            tpItems = tpItems[0].getElementsByTagName("td");
+    var tpItems = document.getElementsByClassName("tradingPostTable");
+    tpItems = tpItems[0].getElementsByTagName("td");
 
-        for(var tpi = 0, tpItem; tpItem = tpItems[tpi]; tpi++)
-            {
-                if (tpItem.innerHTML.includes(`<img src="/images/items`))
-                {
-                var tpName = tpItem.innerText;
+    for (var tpi = 0, tpItem; tpItem = tpItems[tpi]; tpi++) {
+        if (tpItem.innerHTML.includes(`<img src="/images/items`)) {
+            var tpName = tpItem.innerText;
 
-                    if (tpName[0] == " ")
-                    {
-                        tpName = tpName.substring(1);
-                    }
-                var tpLinksDiv = makeLinks(tpItem, tpName);
-                    tpLinksDiv.style = "float:right;"
-
-
-                }
+            if (tpName[0] == " ") {
+                tpName = tpName.substring(1);
             }
+            var tpLinksDiv = makeLinks(tpItem, tpName);
+            tpLinksDiv.style = "float:right;"
+
+
+        }
     }
+}
 
 /////////////////////////////////////////****   Esophagor   **** //////////////////////////////////////
 if (window.location.href.includes("neopetsclassic.com/halloween/esophagor/")) {
@@ -545,6 +479,80 @@ if (window.location.href.includes("neopetsclassic.com/halloween/esophagor/")) {
             for (let cell of row.cells) {
                 let food = cell.innerText;
                 makeLinks(cell, food, true)
+            }
+        }
+    }
+}
+
+
+////////////////////////////////////////////////////****   The Snow Faerie's Quest   **** //////////////////////////////////////
+if (window.location.href.includes("neopetsclassic.com/winter/snowfaerie/")) {
+
+    if (window.location.href.includes("winter/snowfaerie/complete")) {
+        var sfitems = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div.content > table > tbody");
+        //2004
+        if (sfitems === null) {
+            sfitems = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div.content > table > tbody")
+        }
+        if (sfitems === null) {
+
+            return;
+        } else {
+            sfitems = sfitems.getElementsByTagName("b");
+            for (let v in sfitems) {
+                var n = sfitems[v].innerText
+                if (n != undefined && n != "NO" && n != "YES") {
+                    var idiv = sfitems[v].parentElement;
+                    makeLinks(idiv, n, true)
+                }
+            }
+            return
+        }
+    }
+
+    if (window.location.href.includes("winter/snowfaerie/accept")) {
+        //2004 theme
+        var snfa = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div.content > table > tbody > tr");
+
+        //default theme
+        if(snfa === null){
+        snfa = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div.content > table > tbody > tr")
+        }
+
+        if(snfa === null){
+            return
+        }
+        var snfitems = snfa.getElementsByTagName("b");
+        console.log(snfitems);
+
+                for (let ii in snfitems) {
+                if (snfitems[ii].innerText != undefined) {
+                    n = snfitems[ii].innerText;
+                    idiv = snfitems[ii].parentElement;
+                    makeLinks(idiv, n, true)}}
+
+        return
+    } else { ///winter/snowfaerie
+
+        sfitems = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div > table > tbody");
+        if (sfitems === null) {
+            //standard themes
+            sfitems = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div > table")
+        }
+
+        if (sfitems === null) {
+
+            return;
+        } else {
+            var itemcell = sfitems.rows[1].cells[1];
+            itemcell = itemcell.getElementsByTagName("b");
+            for (let item in itemcell) {
+                if (itemcell[item].innerText != undefined) {
+                    n = itemcell[item].innerText;
+                    idiv = itemcell[item].parentElement;
+                    makeLinks(idiv, n, true)
+
+                }
             }
         }
     }
