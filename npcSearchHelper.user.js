@@ -25,7 +25,6 @@
 // Trading Post
 // Auctions
 // Esophagor
-// Tarla
 // Snow Faerie Quests
 
 //If you encounter any bugs please don't hesitate to let me know!! I'm still learning and I appreciate the help :)
