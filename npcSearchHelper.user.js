@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      1.6
+// @version      1.7
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/*
@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 /////////////////// **** NOTES **** /////////////////////////
-//  Updated 9/19/21
+//  Updated 1/29/22
 
 // *** CURRENTLY WORKING FOR: ****
 // Kadoatery
