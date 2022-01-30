@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      1.5
+// @version      1.6
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/*
@@ -25,6 +25,7 @@
 // Trading Post
 // Auctions
 // Esophagor
+// Tarla
 // Snow Faerie Quests
 
 //If you encounter any bugs please don't hesitate to let me know!! I'm still learning and I appreciate the help :)
@@ -555,4 +556,28 @@ if (window.location.href.includes("neopetsclassic.com/winter/snowfaerie/")) {
             }
         }
     }
+}
+
+
+/////////// tarla /////////////////
+if (window.location.href.includes("winter/shopofmystery/purchase/")) {
+var tarla = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div.content")
+
+        if (tarla === null) {
+        tarla = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div.content");}
+
+if (tarla === undefined || tarla.innerText.includes("Other people are ") || tarla.innerText.includes("Awww, looks like I sold"))
+{return}
+    else
+    {
+        tarla = tarla.getElementsByTagName("b")[1];
+       makeLinks(tarla, tarla.innerText);
+
+    }
+
+        if (tarla === null) {
+
+            return;
+        }
+
 }
