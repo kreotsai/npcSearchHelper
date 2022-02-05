@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      1.7
+// @version      1.8
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/*
@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 /////////////////// **** NOTES **** /////////////////////////
-//  Updated 1/29/22
+//  Updated 2/05/22
 
 // *** CURRENTLY WORKING FOR: ****
 // Kadoatery
@@ -52,17 +52,13 @@ function makeLinks(parentDiv, item, shop = false) {
         openSW(e.target.id);
     })
     linksDiv.appendChild(swDiv);
-    //console.log(shop)
-    if (shop == true) {
-        //user shop
-        var shopDiv = document.createElement("shopDiv");
-        shopDiv.innerHTML = `<a style='font-size:20px;font-weight:100'><img width="20px" id='${item}'src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shop.gif"> </a>`;
-        shopDiv.addEventListener("click", function(e) {
-            checkUserShop(e.target.id);
-        })
-        linksDiv.appendChild(shopDiv);
-    }
 
+    //user shop
+    if (shop == true) {
+     var shopDiv = document.createElement("shopDiv");
+    shopDiv.innerHTML = `<a target="_blank" href='https://neopetsclassic.com/market/?sort=None&page=1&query=${item}'style='font-size:20px;font-weight:100'><img width="20px" src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shop.gif"> </a>`;
+    linksDiv.appendChild(shopDiv);
+    }
 
     //sdb
     var sdbDiv = document.createElement("sdbDiv");
