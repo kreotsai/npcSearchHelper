@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      1.8
+// @version      1.9
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/*
@@ -474,6 +474,12 @@ if (window.location.href.includes("neopetsclassic.com/halloween/esophagor/")) {
         for (let row of tbl.rows) {
             for (let cell of row.cells) {
                 let food = cell.innerText;
+
+                if (food.includes(" :")){
+                    food = food.split(" :")[0]
+                }
+
+
                 makeLinks(cell, food, true)
             }
         }
