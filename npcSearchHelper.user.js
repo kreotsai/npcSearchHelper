@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      1.9
+// @version      2.0
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/*
@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 /////////////////// **** NOTES **** /////////////////////////
-//  Updated 2/05/22
+//  Updated 5/04/22
 
 // *** CURRENTLY WORKING FOR: ****
 // Kadoatery
@@ -27,6 +27,7 @@
 // Esophagor
 // Tarla
 // Snow Faerie Quests
+// Neo Shops
 
 //If you encounter any bugs please don't hesitate to let me know!! I'm still learning and I appreciate the help :)
 //<3 plushies
@@ -36,10 +37,6 @@
 
 //Function to add search links to items
 function makeLinks(parentDiv, item, shop = false) {
-    //im dumb and can't figure out escape chars so here's how to make items with "'" in the name work, if someone can fix this plz do lmao
-    if (item.includes("'")) {
-        item = item.replace("'", "%27");
-    }
 
     //div to hold all the other link divs. (Links are in divs so I can more easily add event listeners to them)
     var linksDiv = document.createElement("div");
@@ -47,7 +44,7 @@ function makeLinks(parentDiv, item, shop = false) {
 
     //sw
     var swDiv = document.createElement("swDiv");
-    swDiv.innerHTML = `<a style='font-size:20px;font-weight:100;z-index:900'><img width="20px" id='${item}'src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shopwiz.gif"> </a>`;
+    swDiv.innerHTML = `<a style='font-size:20px;font-weight:100;z-index:900'><img width="20px" id="${item}"src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shopwiz.gif"> </a>`;
     swDiv.addEventListener("click", function(e) {
         openSW(e.target.id);
     })
@@ -56,18 +53,18 @@ function makeLinks(parentDiv, item, shop = false) {
     //user shop
     if (shop == true) {
      var shopDiv = document.createElement("shopDiv");
-    shopDiv.innerHTML = `<a target="_blank" href='https://neopetsclassic.com/market/?sort=None&page=1&query=${item}'style='font-size:20px;font-weight:100'><img width="20px" src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shop.gif"> </a>`;
+    shopDiv.innerHTML = `<a target="_blank" href="https://neopetsclassic.com/market/?sort=None&page=1&query=${item}"style='font-size:20px;font-weight:100'><img width="20px" src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shop.gif"> </a>`;
     linksDiv.appendChild(shopDiv);
     }
 
     //sdb
     var sdbDiv = document.createElement("sdbDiv");
-    sdbDiv.innerHTML = `<a target="_blank" href='https://neopetsclassic.com/safetydeposit/?page=1&query=${item}'style='font-size:20px;font-weight:100'><img width="20px" src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/emptydepositbox.gif"> </a>`;
+    sdbDiv.innerHTML = `<a target="_blank" href="https://neopetsclassic.com/safetydeposit/?page=1&query=${item}"style='font-size:20px;font-weight:100'><img width="20px" src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/emptydepositbox.gif"> </a>`;
     linksDiv.appendChild(sdbDiv);
 
     //tp
     var tpDiv = document.createElement("tpDiv");
-    tpDiv.innerHTML = `<a style='font-size:20px;font-weight:100'><img width="20px" id='${item}'src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/trade_offer.png"> </a>`;
+    tpDiv.innerHTML = `<a style='font-size:20px;font-weight:100'><img width="20px" id="${item}"src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/trade_offer.png"> </a>`;
     tpDiv.addEventListener("click", function(e) {
         openTP(e.target.id);
     })
@@ -265,7 +262,7 @@ if (window.location.href.includes("neopetsclassic.com/faerieland/employ/jobs/"))
 
 
 
-            makeLinks(row, item);
+            makeLinks(row, item, true);
 
 
 
@@ -583,3 +580,19 @@ if (tarla === undefined || tarla.innerText.includes("Other people are ") || tarl
         }
 
 }
+
+/////////////////////////////////////////**   NEO-SHOPS   ** ///////////////////////////////// thanks Nathan!
+if (window.location.href.includes("neopetsclassic.com/viewshop/?shop_id")) {
+    //Get the table where the items for sale are listed, store as var 'shopItemTable'
+    var shopItemTable = document.getElementsByClassName("content")[0];
+    shopItemTable = shopItemTable.getElementsByTagName("tbody")[0];
+
+    for (var s = 0, shopRow; shopRow = shopItemTable.rows[s]; s++) {
+        for (var t = 0, shopItem; shopItem = shopRow.cells[t]; t++) {
+            var shopItem2 = shopItem.getElementsByTagName("b")[0].innerText;
+            console.log(shopItem2);
+            makeLinks(shopItem, shopItem2);
+        }
+        }
+    }
+
