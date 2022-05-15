@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NPC Search Helper
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      3.0
 // @description  A script to help search for items more quickly on NPC!
 // @author       plushies
 // @include      *neopetsclassic.com/*
@@ -11,28 +11,33 @@
 // @grant        none
 // ==/UserScript==
 
-/////////////////// **** NOTES **** /////////////////////////
-//  Updated 5/04/22
+//
+//█▀ █▀▀ █▀█ █ █▀█ ▀█▀   █▀█ █▀█ ▀█▀ █ █▀█ █▄░█ █▀ ▀
+//▄█ █▄▄ █▀▄ █ █▀▀ ░█░   █▄█ █▀▀ ░█░ █ █▄█ █░▀█ ▄█ ▄
 
-// *** CURRENTLY WORKING FOR: ****
-// Kadoatery
-// Inventory
-// SDB
-// User Shop
-// Faerie Quests (RE's and dailies)
-// Employment Agency
-// Mystery Island Training School
-// Trading Post
-// Auctions
-// Esophagor
-// Tarla
-// Snow Faerie Quests
-// Neo Shops
+// To toggle Search Helper ON for a location, change its value to true
+// To toggle Search Helper OFF for a location, change its value to false
+const search = {
+    Auctions: true,
+    EmploymentAgency: true,
+    Esophagor: true,
+    FaerieQuests: true,
+    Inventory: true,
+    Kadoatery: true,
+    MysteryIslandTrainingSchool: true,
+    SafetyDepositBox: true,
+    Shops: true,
+    ShopStock: true,
+    SnowFaerieQuests: true,
+    Tarla: true,
+    TradingPost: true,
+    UserShops: true,
+};
 
-//If you encounter any bugs please don't hesitate to let me know!! I'm still learning and I appreciate the help :)
-//<3 plushies
+//  Last Updated 5/14/22
 
-/////////////////// **** FUNCTIONS **** /////////////////////////
+// Unless you want to try modding the script, don't edit anything below this point!
+// <3 plushies
 
 
 //Function to add search links to items
@@ -52,9 +57,9 @@ function makeLinks(parentDiv, item, shop = false) {
 
     //user shop
     if (shop == true) {
-     var shopDiv = document.createElement("shopDiv");
-    shopDiv.innerHTML = `<a target="_blank" href="https://neopetsclassic.com/market/?sort=None&page=1&query=${item}"style='font-size:20px;font-weight:100'><img width="20px" src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shop.gif"> </a>`;
-    linksDiv.appendChild(shopDiv);
+        var shopDiv = document.createElement("shopDiv");
+        shopDiv.innerHTML = `<a target="_blank" href="https://neopetsclassic.com/market/?sort=None&page=1&query=${item}"style='font-size:20px;font-weight:100'><img width="20px" src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shop.gif"> </a>`;
+        linksDiv.appendChild(shopDiv);
     }
 
     //sdb
@@ -236,9 +241,10 @@ function getKadItems() {
         }
     }
 }
+
 ////////////////////////////////////////////////////****   FEA   **** //////////////////////////////////////
 
-if (window.location.href.includes("neopetsclassic.com/faerieland/employ/jobs/")) {
+if (window.location.href.includes("neopetsclassic.com/faerieland/employ/jobs/") && search.EmploymentAgency == true) {
 
     //Get the table where the items for sale are listed, store as var 'itemTable'
     var itemTable = document.getElementsByClassName("content")[0];
@@ -272,23 +278,13 @@ if (window.location.href.includes("neopetsclassic.com/faerieland/employ/jobs/"))
 }
 
 /////////////////////////////////////////****   KADS   **** //////////////////////////////////////
-if (window.location.href.includes("neopetsclassic.com/games/kadoatery/")) {
+if (window.location.href.includes("neopetsclassic.com/games/kadoatery/") && search.Kadoatery == true) {
     getKadItems();
 }
 
-/////////////////////////////////////////****   QUESTS   **** //////////////////////////////////////
-//all pages, quest REs
-
+/////////////////////////////////////////****   FAERIE QUESTS   **** //////////////////////////////////////
 var fqRE = document.getElementsByClassName("faerie_quest")[0]
-
-if (fqRE === undefined) {
-    console.log("no quest RE here")
-}
-
-//when there is a FQ RE
-else {
-    console.log("else fqRE = " + fqRE.innerHTML);
-
+if (!fqRE === undefined && search.FaerieQuests == true) {
     if (fqRE.innerHTML.indexOf("<b>'") !== -1) {
         var questItem = fqRE.getElementsByTagName("b")[1].innerText;
         questItem = questItem.replace("'", "");
@@ -297,101 +293,65 @@ else {
 
         makeLinks(fqRE, questItem, true);
     }
-
 }
 
 //quest page
-if (window.location.href.includes("neopetsclassic.com/quests")) {
-    console.log("quest page");
+if (window.location.href.includes("neopetsclassic.com/quests") && search.FaerieQuests == true) {
     var ps = document.getElementsByTagName("p");
-
     for (var j = 0, p; p = ps[j]; j++) {
-
         if (ps[j].innerHTML.indexOf("You are currently on a quest!") !== -1) {
             questItem = ps[j + 1].innerText;
             questItem = questItem.split("brought my ")[1];
             questItem = questItem.split(" back yet?")[0];
-            console.log(questItem);
-
             makeLinks(ps[j + 1], questItem)
         }
-
     }
-
 }
 
-/////////////////// **** SHOP **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/market/?page=")) {
+/////////////////// **** SHOP STOCK **** /////////////////////////
+if (window.location.href.includes("neopetsclassic.com/market/?page=") && search.ShopStock == true) {
     var shop = window;
     var shopItems = getShopItems(shop)
-
     if (shopItems !== undefined) {
-
         for (var k = 0, listItem; listItem = shopItems[k]; k++) {
             console.log(listItem.innerText)
             var itemText = listItem.innerText
             makeLinks(listItem, itemText);
         }
-
     }
-
 }
 
 /////////////////// **** SDB **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/safetydeposit/")) {
-    console.log("sdb");
-
+if (window.location.href.includes("neopetsclassic.com/safetydeposit/") && search.SafetyDepositBox == true) {
     var sdb = window;
     var sdbItems = getShopItems(sdb)
-
     if (sdbItems !== undefined) {
-
         for (var l = 0, sdbItem; sdbItem = sdbItems[l]; l++) {
-
             var sdbText = sdbItem.innerText
             sdbText = sdbText.split("(")[0];
-
-            console.log(sdbText);
-
             makeLinks(sdbItem, sdbText);
         }
-
     }
-
 }
 
 
-
 /////////////////// **** INVENTORY **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/inventory/")) {
-    console.log("inventory");
-
+if (window.location.href.includes("neopetsclassic.com/inventory/") && search.Inventory == true) {
     var inv = window;
     var invItems = inv.document.getElementsByClassName("inventoryitem")
-
     if (invItems !== undefined) {
-
         for (var m = 0, invItem; invItem = invItems[m]; m++) {
-
             var invText = invItem.innerText
             invText = invText.split("(")[0];
-
-            console.log(invText);
-
             makeLinks(invItem, invText);
         }
-
     }
-
 }
 
 
 /////////////////// **** MYSTERY ISLAND SCHOOL **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/island/training/status/")) {
-    console.log("mystery island training");
-
+if (window.location.href.includes("neopetsclassic.com/island/training/status/") && search.MysteryIslandTrainingSchool == true) {
     var codestones = document.getElementsByTagName("b")
-
     for (var c = 0, codestone; codestone = codestones[c]; c++) {
         if (codestone.innerText.includes("Codestone")) {
             var csName = codestone.innerText
@@ -403,60 +363,41 @@ if (window.location.href.includes("neopetsclassic.com/island/training/status/"))
 
 
 /////////////////// **** AUCTIONS **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/auctions/view/?auction_id=")) {
-    console.log("auction page");
+if (window.location.href.includes("neopetsclassic.com/auctions/view/?auction_id=") && search.Auctions == true) {
     var auctionItem = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div.content > div:nth-child(4) > p:nth-child(4) > b");
-
-
-
     if (auctionItem === null) {
-        console.log("null auction item, checking again");
         //standard themes
         auctionItem = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div.content > div:nth-child(4) > p:nth-child(4) > b");
     }
-
     if (auctionItem === null) {
         console.log("auction item after 2nd check, returning");
         return
     } else {
-
-
         var aucName = auctionItem.innerText.split(" (owned by")[0];
         makeLinks(auctionItem, aucName, true);
-
-        console.log(aucName);
-
-
     }
-
 }
 
 
 
 /////////////////// **** TRADING POST **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/island/tradingpost/browse/")) {
-    console.log("trading post");
-
+if (window.location.href.includes("neopetsclassic.com/island/tradingpost/browse/") && search.TradingPost == true) {
     var tpItems = document.getElementsByClassName("tradingPostTable");
     tpItems = tpItems[0].getElementsByTagName("td");
-
     for (var tpi = 0, tpItem; tpItem = tpItems[tpi]; tpi++) {
         if (tpItem.innerHTML.includes(`<img src="/images/items`)) {
             var tpName = tpItem.innerText;
-
             if (tpName[0] == " ") {
                 tpName = tpName.substring(1);
             }
             var tpLinksDiv = makeLinks(tpItem, tpName);
             tpLinksDiv.style = "float:right;"
-
-
         }
     }
 }
 
 /////////////////////////////////////////****   Esophagor   **** //////////////////////////////////////
-if (window.location.href.includes("neopetsclassic.com/halloween/esophagor/")) {
+if (window.location.href.includes("neopetsclassic.com/halloween/esophagor/") && search.Esophagor == true) {
     var tbl = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div > table > tbody");
     if (tbl === null) {
         //standard themes
@@ -468,12 +409,9 @@ if (window.location.href.includes("neopetsclassic.com/halloween/esophagor/")) {
         for (let row of tbl.rows) {
             for (let cell of row.cells) {
                 let food = cell.innerText;
-
-                if (food.includes(" :")){
+                if (food.includes(" :")) {
                     food = food.split(" :")[0]
                 }
-
-
                 makeLinks(cell, food, true)
             }
         }
@@ -482,8 +420,7 @@ if (window.location.href.includes("neopetsclassic.com/halloween/esophagor/")) {
 
 
 ////////////////////////////////////////////////////****   The Snow Faerie's Quest   **** //////////////////////////////////////
-if (window.location.href.includes("neopetsclassic.com/winter/snowfaerie/")) {
-
+if (window.location.href.includes("neopetsclassic.com/winter/snowfaerie/") && search.SnowFaerieQuests == true) {
     if (window.location.href.includes("winter/snowfaerie/complete")) {
         var sfitems = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div.content > table > tbody");
         //2004
@@ -491,7 +428,6 @@ if (window.location.href.includes("neopetsclassic.com/winter/snowfaerie/")) {
             sfitems = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div.content > table > tbody")
         }
         if (sfitems === null) {
-
             return;
         } else {
             sfitems = sfitems.getElementsByTagName("b");
@@ -511,21 +447,23 @@ if (window.location.href.includes("neopetsclassic.com/winter/snowfaerie/")) {
         var snfa = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div.content > table > tbody > tr");
 
         //default theme
-        if(snfa === null){
-        snfa = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div.content > table > tbody > tr")
+        if (snfa === null) {
+            snfa = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div.content > table > tbody > tr")
         }
 
-        if(snfa === null){
+        if (snfa === null) {
             return
         }
         var snfitems = snfa.getElementsByTagName("b");
         console.log(snfitems);
 
-                for (let ii in snfitems) {
-                if (snfitems[ii].innerText != undefined) {
-                    n = snfitems[ii].innerText;
-                    idiv = snfitems[ii].parentElement;
-                    makeLinks(idiv, n, true)}}
+        for (let ii in snfitems) {
+            if (snfitems[ii].innerText != undefined) {
+                n = snfitems[ii].innerText;
+                idiv = snfitems[ii].parentElement;
+                makeLinks(idiv, n, true)
+            }
+        }
 
         return
     } else { ///winter/snowfaerie
@@ -535,9 +473,7 @@ if (window.location.href.includes("neopetsclassic.com/winter/snowfaerie/")) {
             //standard themes
             sfitems = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div > table")
         }
-
         if (sfitems === null) {
-
             return;
         } else {
             var itemcell = sfitems.rows[1].cells[1];
@@ -556,44 +492,45 @@ if (window.location.href.includes("neopetsclassic.com/winter/snowfaerie/")) {
 
 
 /////////// tarla /////////////////
-if (window.location.href.includes("winter/shopofmystery/purchase/")) {
-var tarla = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div.content")
+if (window.location.href.includes("winter/shopofmystery/purchase/") && search.Tarla == true) {
+    var tarla = document.querySelector("body > table:nth-child(4) > tbody > tr > td:nth-child(3) > div.content")
 
-        if (tarla === null) {
-        tarla = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div.content");}
+    if (tarla === null) {
+        tarla = document.querySelector("body > table:nth-child(5) > tbody > tr > td:nth-child(3) > div.content");
+    }
 
-if (tarla === undefined || tarla.innerText.includes("Other people are ") || tarla.innerText.includes("Awww, looks like I sold"))
-{return}
-    else
-    {
+    if (tarla === undefined || tarla.innerText.includes("Other people are ") || tarla.innerText.includes("Awww, looks like I sold")) {
+        return
+    } else {
         tarla = tarla.getElementsByTagName("b")[1];
-       makeLinks(tarla, tarla.innerText);
+        makeLinks(tarla, tarla.innerText);
 
     }
 
-        if (tarla === null) {
+    if (tarla === null) {
 
-            return;
-        }
+        return;
+    }
 
 }
 
-/////////////////////////////////////////**   NEO-SHOPS   ** ///////////////////////////////// thanks Nathan!
-if (window.location.href.includes("neopetsclassic.com/viewshop/?shop_id")) {
+/////////////////////////////////////////**   NEO-SHOPS   ** ///////////////////////////////// (thanks Nathan!)
+if (window.location.href.includes("neopetsclassic.com/viewshop/?shop_id") && search.Shops == true) {
     //Get the table where the items for sale are listed, store as var 'shopItemTable'
     var shopItemTable = document.getElementsByClassName("content")[0];
     shopItemTable = shopItemTable.getElementsByTagName("tbody")[0];
-
     for (var s = 0, shopRow; shopRow = shopItemTable.rows[s]; s++) {
         for (var t = 0, shopItem; shopItem = shopRow.cells[t]; t++) {
             var shopItem2 = shopItem.getElementsByTagName("b")[0].innerText;
+            console.log(shopItem2);
             makeLinks(shopItem, shopItem2);
         }
-        }
     }
+}
+
 
 /////////////////////////////////////////**   USER-SHOPS   ** /////////////////////////////////
-if (window.location.href.includes("/market/browseshop/?owner=")) {
+if (window.location.href.includes("/market/browseshop/?owner=") && search.UserShops == true) {
     //Get the table where the items for sale are listed, store as var 'shopItemTable'
     shopItemTable = document.getElementsByClassName("content")[0];
     shopItemTable = shopItemTable.getElementsByTagName("tbody")[0];
@@ -604,6 +541,5 @@ if (window.location.href.includes("/market/browseshop/?owner=")) {
             console.log(shopItem2);
             makeLinks(shopItem, shopItem2);
         }
-        }
     }
-
+}
