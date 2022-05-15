@@ -321,7 +321,7 @@ if (window.location.href.includes("neopetsclassic.com/quests")) {
 }
 
 /////////////////// **** SHOP **** /////////////////////////
-if (window.location.href.includes("neopetsclassic.com/market/")) {
+if (window.location.href.includes("neopetsclassic.com/market/?page=")) {
     var shop = window;
     var shopItems = getShopItems(shop)
 
@@ -330,9 +330,6 @@ if (window.location.href.includes("neopetsclassic.com/market/")) {
         for (var k = 0, listItem; listItem = shopItems[k]; k++) {
             console.log(listItem.innerText)
             var itemText = listItem.innerText
-
-            //console.log(itemText);
-
             makeLinks(listItem, itemText);
         }
 
@@ -590,6 +587,20 @@ if (window.location.href.includes("neopetsclassic.com/viewshop/?shop_id")) {
     for (var s = 0, shopRow; shopRow = shopItemTable.rows[s]; s++) {
         for (var t = 0, shopItem; shopItem = shopRow.cells[t]; t++) {
             var shopItem2 = shopItem.getElementsByTagName("b")[0].innerText;
+            makeLinks(shopItem, shopItem2);
+        }
+        }
+    }
+
+/////////////////////////////////////////**   USER-SHOPS   ** /////////////////////////////////
+if (window.location.href.includes("/market/browseshop/?owner=")) {
+    //Get the table where the items for sale are listed, store as var 'shopItemTable'
+    shopItemTable = document.getElementsByClassName("content")[0];
+    shopItemTable = shopItemTable.getElementsByTagName("tbody")[0];
+
+    for (s = 0, shopRow; shopRow = shopItemTable.rows[s]; s++) {
+        for (t = 0, shopItem; shopItem = shopRow.cells[t]; t++) {
+            shopItem2 = shopItem.getElementsByTagName("b")[0].innerText;
             console.log(shopItem2);
             makeLinks(shopItem, shopItem2);
         }
