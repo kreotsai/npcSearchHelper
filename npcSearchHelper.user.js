@@ -51,7 +51,7 @@ function makeLinks(parentDiv, item, shop = false) {
     var swDiv = document.createElement("swDiv");
     swDiv.innerHTML = `<a style='font-size:20px;font-weight:100;z-index:900'><img width="20px" id="${item}"src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/shopwiz.gif"> </a>`;
     swDiv.addEventListener("click", function(e) {
-        openSW(e.target.id);
+        openSW(item);
     })
     linksDiv.appendChild(swDiv);
 
@@ -71,7 +71,7 @@ function makeLinks(parentDiv, item, shop = false) {
     var tpDiv = document.createElement("tpDiv");
     tpDiv.innerHTML = `<a style='font-size:20px;font-weight:100'><img width="20px" id="${item}"src="https://raw.githubusercontent.com/kreotsai/npcShopTools/main/trade_offer.png"> </a>`;
     tpDiv.addEventListener("click", function(e) {
-        openTP(e.target.id);
+        openTP(item);
     })
     linksDiv.appendChild(tpDiv);
 
