@@ -34,7 +34,7 @@ const search = {
     UserShops: true,
 };
 
-//  Last Updated 5/14/22
+//  Last Updated 5/24/22
 
 // Unless you want to try modding the script, don't edit anything below this point!
 // <3 plushies
@@ -514,7 +514,7 @@ if (window.location.href.includes("winter/shopofmystery/purchase/") && search.Ta
 
 }
 
-/////////////////////////////////////////**   NEO-SHOPS   ** ///////////////////////////////// (thanks Nathan!)
+/////////////////////////////////////////**   NEO-SHOPS   ** ///////////////////////////////// 
 if (window.location.href.includes("neopetsclassic.com/viewshop/?shop_id") && search.Shops == true) {
     //Get the table where the items for sale are listed, store as var 'shopItemTable'
     var shopItemTable = document.getElementsByClassName("content")[0];
